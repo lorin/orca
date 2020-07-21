@@ -59,8 +59,8 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
   def "should build EXPLICIT rollback context using the old server group"() {
     given:
     def newServerGroup = "servergroup-v002"
-    def oldServerGroup = "servergroup-v000"
-    stage.context.putAll([ moniker: null, serverGroup: newServerGroup, onlyEnabledServerGroup: true ])
+    def oldServerGroup = "servergroup-v001"
+    stage.context.putAll(buildAdditionalStageContext("servergroup-v002", true))
 
     oortService.getServerGroup("test", "us-west-2", "servergroup-v002") >> {
       return buildResponse([
