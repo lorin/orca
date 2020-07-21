@@ -22,6 +22,7 @@ import com.netflix.spinnaker.orca.clouddriver.FeaturesService
 import com.netflix.spinnaker.orca.clouddriver.OortService
 import retrofit.client.Response
 import retrofit.mime.TypedByteArray
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
@@ -54,6 +55,30 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
       ]
     ]
   }
+
+  def oldServerGroup = "servergroup-v123"
+
+  @Ignore
+  def "should build EXPLICIT rollback context using the old server group"() {
+    given:
+    stage.context.putAll(additionalStageContext)
+
+    when:
+    def result = task.execute(stage)
+
+    then:
+    (shouldFetchServerGroup ? 1 : 0) * oortService.getServerGroup("test", "us-west-2", "servergroup-v002") >> {
+      return buildResponse([
+          moniker: [
+              app    : "app",
+              cluster: "app-stack-details"
+          ]
+      ])
+    }
+
+
+  }
+
 
   @Unroll
   def "should build EXPLICIT rollback context when there are _only_ previous server groups"() {
