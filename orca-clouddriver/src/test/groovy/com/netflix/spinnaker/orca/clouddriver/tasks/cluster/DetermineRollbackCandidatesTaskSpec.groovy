@@ -85,6 +85,9 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
     def result = task.execute(stage)
 
     then:
+    result.outputs["rollbackTypes"]["us-west-2"] == "EXPLICIT"
+    result.outputs["rollbackContexts"]["us-west-2"]["restoreServerGroupName"] == oldServerGroup
+    /*
     result.outputs == [
         rollbackTypes : [
             "us-west-2": "EXPLICIT"
@@ -97,6 +100,7 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
             ]
         ]
     ]
+     */
   }
 
 
