@@ -56,27 +56,40 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
     ]
   }
 
-  def oldServerGroup = "servergroup-v123"
 
-  @Ignore
   def "should build EXPLICIT rollback context using the old server group"() {
     given:
-    stage.context.putAll(additionalStageContext)
+    def newServerGroup = "servergroup-v002"
+    def oldServerGroup = "servergroup-v001"
+    stage.context.putAll([ moniker: null, serverGroup: newServerGroup, onlyEnabledServerGroup: true ])
+
+    oortService.getCluster("app", "test", "app-stack-details", "aws") >> {
+      return buildResponse([
+          serverGroups: [
+              buildServerGroup("servergroup-v000", "us-west-2", 50, false, [name: "my_image-0"], [:], 5),
+              buildServerGroup("servergroup-v001", "us-west-2", 100, true, [name: "my_image-1"], [:], 5),
+              buildServerGroup("servergroup-v002", "us-west-2", 150, false, [name: "my_image-2"], [:], 5)
+          ]
+      ])
+    }
 
     when:
     def result = task.execute(stage)
 
     then:
-    (shouldFetchServerGroup ? 1 : 0) * oortService.getServerGroup("test", "us-west-2", "servergroup-v002") >> {
-      return buildResponse([
-          moniker: [
-              app    : "app",
-              cluster: "app-stack-details"
-          ]
-      ])
-    }
+    result.outputs == [
+        rollbackTypes : [
+            "us-west-2": "EXPLICIT"
+        ],
+        rollbackContexts: [
+            "us-west-2": [
+                rollbackServerGroupName : newServerGroup,
+                restoreServerGroupName: oldServerGroup,
+                targetHealthyRollbackPercentage: 100
+            ]
+        ]
 
-
+    ]
   }
 
 
