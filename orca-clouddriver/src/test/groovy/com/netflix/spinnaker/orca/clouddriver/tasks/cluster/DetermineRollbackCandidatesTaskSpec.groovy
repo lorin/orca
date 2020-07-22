@@ -60,9 +60,9 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
     given:
     def newServerGroup = "servergroup-v002"
     def oldServerGroup = "servergroup-v001"
-    stage.context.putAll(buildAdditionalStageContext("servergroup-v002", true))
+    stage.context.putAll(buildAdditionalStageContext(newServerGroup, true))
 
-    oortService.getServerGroup("test", "us-west-2", "servergroup-v002") >> {
+    oortService.getServerGroup("test", "us-west-2", newServerGroup) >> {
       return buildResponse([
           moniker: [
               app    : "app",
@@ -76,7 +76,7 @@ class DetermineRollbackCandidatesTaskSpec extends Specification {
           serverGroups: [
               buildServerGroup("servergroup-v000", "us-west-2", 50, false, [name: "my_image-0"], [:], 5),
               buildServerGroup("servergroup-v001", "us-west-2", 100, true, [name: "my_image-1"], [:], 5),
-              buildServerGroup("servergroup-v002", "us-west-2", 150, false, [name: "my_image-2"], [:], 5)
+              buildServerGroup(newServerGroup, "us-west-2", 150, false, [name: "my_image-2"], [:], 5)
           ]
       ])
     }
